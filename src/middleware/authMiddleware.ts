@@ -1,29 +1,20 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import User, { IUser } from '../models/userModel';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-interface JwtPayload {
-  id: string;
-}
+import User from '../models/userModel';
 
 interface AuthenticatedRequest extends Request {
-  user?: IUser;
+  user?: any;
 }
 
-export const protect = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const protect = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   let token;
-
+  
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-
-      req.user = await User.findById(decoded.id).select('-password');
-
+      req.user = await User.findById((decoded as any).id).select('-password');
       next();
     } catch (error) {
       res.status(401).json({ message: 'Not authorized, token failed' });
@@ -35,10 +26,12 @@ export const protect = async (req: AuthenticatedRequest, res: Response, next: Ne
   }
 };
 
-export const admin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const admin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   if (req.user && req.user.role === 'admin') {
     next();
   } else {
     res.status(403).json({ message: 'Not authorized as an admin' });
   }
 };
+
+export { protect, admin };
