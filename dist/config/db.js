@@ -12,18 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectDB = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+const MONGO_URI = 'mongodb+srv://koustubhlap:kond018@koustubh18.qmw1c9a.mongodb.net/UserAuthDB';
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield mongoose_1.default.connect(process.env.MONGO_URI, {
-        // These options are no longer needed with recent versions of Mongoose
+        yield mongoose_1.default.connect(MONGO_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
         });
-        console.log('MongoDB connected');
+        console.log('MongoDB connected...');
     }
     catch (error) {
         console.error('MongoDB connection failed:', error.message);
         process.exit(1);
     }
 });
-exports.connectDB = connectDB;
+exports.default = connectDB;
